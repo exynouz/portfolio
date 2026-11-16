@@ -47,3 +47,22 @@ test('mobile: navigation, module switch and dialog',async({page})=>{
   await page.waitForTimeout(200);
   await page.screenshot({path:'.sites-runtime/screenshots/mobile.png',fullPage:true});
 });
+
+test('motion is active, scroll reveals work, and reduced motion is respected',async({page})=>{
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.goto('/');
+  const preview=page.locator('.hero-studio .tool-preview');
+  await expect(preview).toHaveCSS('animation-name','float-preview');
+  await expect.poll(()=>preview.evaluate(el=>el.getAnimations().find(a=>a.animationName==='float-preview')?.effect.getComputedTiming().progress)).not.toBeNull();
+  const progress=await preview.evaluate(el=>el.getAnimations()[0].currentTime);
+  await page.waitForTimeout(200);
+  expect(await preview.evaluate(el=>el.getAnimations()[0].currentTime)).toBeGreaterThan(progress);
+  const card=page.locator('.project-card').first();
+  await card.scrollIntoViewIfNeeded();
+  await expect(card).toHaveAttribute('data-reveal','visible');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.reload();
+  await expect(preview).toHaveCSS('animation-name','none');
+  await expect(page.locator('[data-reveal="pending"]')).toHaveCount(0);
+  expect(await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length)).toBe(0);
+});

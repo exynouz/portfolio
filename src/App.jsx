@@ -6,6 +6,31 @@ const whatsapp = `https://wa.me/${profile.whatsapp}?text=${encodeURIComponent('H
 
 function Logo(){return <span className="logo-symbol" aria-hidden="true"><span>v</span><span>r</span></span>;}
 
+function useScrollReveal(dependency) {
+  useEffect(()=>{
+    const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
+    if(motion.matches || !('IntersectionObserver' in window))return;
+    const elements=[...document.querySelectorAll('.section-top, .module-tabs, .featured-workspace, .project-card, .about-grid > div, .contact-heading, .contact-bottom')].filter(el=>!el.hasAttribute('data-reveal'));
+    const observer=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){entry.target.dataset.reveal='visible';observer.unobserve(entry.target);}
+      });
+    },{threshold:0.08,rootMargin:'0px 0px -28px 0px'});
+    elements.forEach((el,i)=>{el.dataset.reveal='pending';el.style.setProperty('--reveal-delay',`${i%2*85}ms`);observer.observe(el);});
+    const disable=()=>{if(motion.matches){elements.forEach(el=>el.dataset.reveal='visible');observer.disconnect();}};
+    motion.addEventListener('change',disable);
+    return ()=>{observer.disconnect();motion.removeEventListener('change',disable);elements.forEach(el=>{if(el.dataset.reveal==='pending')delete el.dataset.reveal;});};
+  },[dependency]);
+}
+
+function tiltPreview(event){
+  if(!window.matchMedia('(hover: hover) and (prefers-reduced-motion: no-preference)').matches)return;
+  const box=event.currentTarget.getBoundingClientRect();
+  event.currentTarget.style.setProperty('--tilt-x',`${((event.clientY-box.top)/box.height-.5)*-6}deg`);
+  event.currentTarget.style.setProperty('--tilt-y',`${((event.clientX-box.left)/box.width-.5)*8}deg`);
+}
+function resetTilt(event){event.currentTarget.style.setProperty('--tilt-x','0deg');event.currentTarget.style.setProperty('--tilt-y','0deg');}
+
 function ModuleVisual({type='development', view}) {
   if(type==='samples')return <div className="tool-preview barcode-preview"><div className="tool-preview-top"><Box size={13}/><span>SAMPLE REGISTER</span><span className="preview-status">IDENTIFIED</span></div><div className="barcode-label"><span>SAMPLE PRODUCT</span><strong>SP-001</strong><svg className="barcode-bars" viewBox="0 0 240 58" role="img" aria-label="Ilustrasi label barcode sample">{Array.from({length:65},(_,i)=><rect key={i} x={i*3.6} y="0" width={i%3===0?2.7:1.3} height={i%7===0?58:49} fill="currentColor"/>)}</svg><small>SAMPLE / LABEL PREVIEW</small></div><div className="preview-bottom"><span>Data sample</span><ArrowRight size={12}/><span>Identitas barcode</span></div></div>;
   if(type==='inspection')return <div className="tool-preview inspection-preview"><div className="tool-preview-top"><Check size={13}/><span>{view==='Report'?'QC REPORT':'QUALITY INSPECTION'}</span><span className="preview-status">QC</span></div><div className="preview-heading">Inspection checklist<span>Detail pemeriksaan</span></div><div className="qc-table-head"><span>PARAMETER</span><span>HASIL</span><span>STATUS</span></div>{['Spesifikasi','Dimensi','Visual','Dokumen'].map(t=><div className="qc-row" key={t}><span>{t}</span><span>Reviewed</span><span><Check size={10}/>OK</span></div>)}<div className="preview-bottom"><FileText size={12}/><span>Catatan dan laporan pemeriksaan</span></div></div>;
@@ -21,8 +46,8 @@ function Workspace({project, compact=false}) {
     <div className="workspace-body"><aside className="workspace-sidebar"><span className="workspace-app"><Box size={19}/></span>{[Layers,SlidersHorizontal,Database,FileText].map((Icon,i)=><span key={i} className={i===0?'selected':''}><Icon size={15}/></span>)}<span className="sidebar-bottom">VR</span></aside>
     <div className="workspace-main"><div className="workspace-heading"><div><span className="workspace-breadcrumb">Modules <ChevronRight size={9}/>{project.code}</span><h3>{project.name}</h3></div><span className="workspace-mode">PREVIEW</span></div>
     <div className="workspace-tabs">{project.tabs.map(t=><button key={t} className={view===t?'selected':''} onClick={()=>setView(t)}>{t}</button>)}</div>
-    <div className={`workspace-canvas object-${project.color}`}><div className="technical-grid"/><span className="canvas-label">{project.code} / MODULE PREVIEW</span><ModuleVisual type={project.id} view={view}/><span className="canvas-legend">ILLUSTRATIVE INTERFACE</span></div>
-    <div className="workspace-fields">{project.fields[view].map(([label,value])=><div key={label}><span>{label}</span><strong>{value}<ChevronRight size={10}/></strong></div>)}</div>
+    <div className={`workspace-canvas object-${project.color}`}><div className="technical-grid"/><span className="canvas-label">{project.code} / MODULE PREVIEW</span><ModuleVisual key={view} type={project.id} view={view}/><span className="canvas-legend">ILLUSTRATIVE INTERFACE</span></div>
+    <div className="workspace-fields" key={view}>{project.fields[view].map(([label,value])=><div key={label}><span>{label}</span><strong>{value}<ChevronRight size={10}/></strong></div>)}</div>
     <div className="workspace-footer"><span><i/> Portfolio interface preview</span><span>No internal data <Check size={10}/></span></div></div></div>
   </div>;
 }
@@ -36,6 +61,7 @@ function CaseDialog({project,onClose}){
 function App(){
   const [featured,setFeatured]=useState('development');
   const [filter,setFilter]=useState('Semua');
+  useScrollReveal(filter);
   const [selected,setSelected]=useState(null);
   const [menu,setMenu]=useState(false);
   const [copied,setCopied]=useState(false);
@@ -49,7 +75,7 @@ function App(){
     <header className="site-header"><div className="container nav"><a href="#" className="brand" aria-label="Valen Ramadhan, ke atas"><Logo/><span>valen<span className="accent">.</span></span></a><nav id="main-navigation" className={menu?'navigation open':'navigation'} aria-label="Navigasi utama">{[['projects','Projects'],['about','Tentang'],['contact','Kontak']].map(([id,label])=><a key={id} href={`#${id}`} onClick={()=>setMenu(false)}>{label}</a>)}<a href={profile.github} target="_blank" rel="noopener noreferrer">GitHub <ArrowUpRight size={13}/></a></nav><a className="header-contact" href={whatsapp} target="_blank" rel="noopener noreferrer">Hubungi saya <ArrowUpRight size={14}/></a><button className="menu-toggle" onClick={()=>setMenu(!menu)} aria-expanded={menu} aria-controls="main-navigation" aria-label={menu?'Tutup navigasi':'Buka navigasi'}>{menu?<X size={22}/>:<Menu size={22}/>}</button></div></header>
     <main id="main">
       <section className="hero container"><div className="hero-copy"><div className="hero-label"><span/> WEB DEVELOPER <i/> INDONESIA</div><h1>Valen<br/>Ramadhan<span>.</span></h1><div className="hero-bio"><span className="bio-rule"/><p>Saya membuat tools, modul, dan website untuk kebutuhan perusahaan. Mulai dari estimasi dan QC, pengelolaan tugas harian, sampai barcode sample dan laporan.</p></div><div className="hero-actions"><a className="button primary" href="#projects">Lihat project <ArrowDown size={15}/></a><a className="button text" href={profile.github} target="_blank" rel="noopener noreferrer">GitHub <ArrowUpRight size={15}/></a></div><div className="hero-stack"><span>LARAVEL</span><i/><span>JAVASCRIPT</span><i/><span>REACT</span><i/><span>MYSQL</span></div></div>
-      <div className="hero-studio"><div className="studio-top"><span>COMPANY TOOLS & MODULES</span><span>DEVELOPMENT / WEB</span></div><div className="studio-object object-blue"><div className="technical-grid"/><ModuleVisual type="development"/></div><div className="studio-bottom"><span><i/> DEVELOPMENT ? QC ? TASKS ? REPORTS</span><ArrowUpRight size={18}/></div></div></section>
+      <div className="hero-studio" onPointerMove={tiltPreview} onPointerLeave={resetTilt}><div className="studio-top"><span>COMPANY TOOLS & MODULES</span><span>DEVELOPMENT / WEB</span></div><div className="studio-object object-blue"><div className="technical-grid"/><ModuleVisual type="development"/></div><div className="studio-bottom"><span><i/> DEVELOPMENT ? QC ? TASKS ? REPORTS</span><ArrowUpRight size={18}/></div></div></section>
 
       <section className="featured-section container" aria-labelledby="featured-title"><div className="section-top"><div><span className="section-label">BUSINESS APPLICATIONS</span><h2 id="featured-title">Tools & modul perusahaan<span>.</span></h2></div><p>Development, quality control,<br/>operasional, dan pelaporan.</p></div><div className="module-tabs" aria-label="Pilih preview modul">{projects.slice(0,4).map(p=><button className={featured===p.id?'active':''} aria-pressed={featured===p.id} onClick={()=>setFeatured(p.id)} key={p.id}><span>{p.code}</span><small>{p.name}</small><ArrowUpRight size={15}/></button>)}</div><div className="featured-workspace"><Workspace key={featured} project={current}/><div className="featured-info"><div><span className="section-label">{current.code} / COMPANY MODULE</span><h3>{current.name}</h3><p>{current.description}</p></div><button className="button outline" onClick={()=>setSelected(current)}>Detail project <ArrowUpRight size={15}/></button></div></div></section>
 
