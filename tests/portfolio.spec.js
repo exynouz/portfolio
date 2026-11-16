@@ -5,7 +5,7 @@ test('desktop: module previews, project filtering, details and contact', async (
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/');
-  await expect(page.getByRole('heading',{level:1})).toContainText('Ramadhan');
+  await expect(page.getByRole('heading',{level:1})).toContainText('MOTION.');
   await expect(page.locator('.project-card')).toHaveCount(5);
   await expect(page.locator('main')).not.toContainText(/Gland Packing|Spiral Wound|Expansion Joint|GPP|SWG|EJF|EJM/);
   await page.getByRole('button',{name:'QC Product Inspection'}).click();
@@ -65,4 +65,24 @@ test('motion is active, scroll reveals work, and reduced motion is respected',as
   await expect(preview).toHaveCSS('animation-name','none');
   await expect(page.locator('[data-reveal="pending"]')).toHaveCount(0);
   expect(await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length)).toBe(0);
+});
+
+test('interactive workbench estimates, checks QC, updates tasks and exports barcode',async({page})=>{
+  await page.goto('/');
+  await page.getByRole('slider',{name:/Jumlah item/}).fill('8');
+  await expect(page.locator('.lab-total')).toContainText('2.000.000');
+  await page.getByRole('tab',{name:'QC',exact:true}).click();
+  await page.getByRole('button',{name:/Spesifikasi sesuai/}).click();
+  await expect(page.locator('.lab-help')).toContainText('1 dari 3');
+  await page.getByRole('tab',{name:'Tasks',exact:true}).click();
+  await page.getByRole('button',{name:/Implementasi interface/}).click();
+  await expect(page.locator('.lab-help')).toContainText('2 / 3');
+  await page.getByRole('tab',{name:'Barcode',exact:true}).click();
+  await page.getByRole('textbox',{name:'Kode sample'}).fill('QC-VALEN-024');
+  await expect(page.locator('.live-barcode svg')).toHaveAttribute('aria-label','Barcode CODE128 QC-VALEN-024');
+  const download=page.waitForEvent('download');
+  await page.getByRole('button',{name:'Download SVG'}).click();
+  expect((await download).suggestedFilename()).toBe('QC-VALEN-024.svg');
+  await page.getByRole('textbox',{name:'Kode sample'}).fill('');
+  await expect(page.getByRole('button',{name:'Download SVG'})).toBeDisabled();
 });

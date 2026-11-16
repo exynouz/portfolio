@@ -1,0 +1,21 @@
+import {useEffect, useRef, useState} from 'react';
+import JsBarcode from 'jsbarcode';
+import {ArrowUpRight, Check, Download, Plus} from 'lucide-react';
+
+export default function Playground(){
+  const [mode,setMode]=useState('Estimate');
+  const [quantity,setQuantity]=useState(4);
+  const [checks,setChecks]=useState([false,false,false]);
+  const [tasks,setTasks]=useState([{name:'Review kebutuhan modul',done:true},{name:'Implementasi interface',done:false},{name:'Testing & laporan',done:false}]);
+  const [code,setCode]=useState('SAMPLE-001');
+  const barcode=useRef(null);
+  const valid=/^[\x20-\x7E]{1,24}$/.test(code);
+  useEffect(()=>{if(mode==='Barcode'&&valid&&barcode.current)JsBarcode(barcode.current,code,{format:'CODE128',width:2,height:64,displayValue:true,background:'#ffffff',lineColor:'#111111',fontSize:15,margin:16});},[mode,code,valid]);
+  function download(){const blob=new Blob([new XMLSerializer().serializeToString(barcode.current)],{type:'image/svg+xml'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${code.replace(/[^a-zA-Z0-9_-]/g,'_')}.svg`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+  return <section className="lab-section container" id="playground"><div className="lab-intro"><span className="section-label">NOT JUST A SCREENSHOT</span><h2>Coba sendiri<span>↘</span></h2><p>Potongan interaksi dari tools yang saya bangun. Data dan perhitungan di sini hanya untuk demo.</p><div className="lab-status"><i/>LIVE INTERACTION / NO LOGIN</div></div><div className="lab-panel"><div className="lab-tabs" role="tablist" aria-label="Demo tools">{['Estimate','QC','Tasks','Barcode'].map(m=><button key={m} role="tab" aria-selected={mode===m} onClick={()=>setMode(m)}>{m}<ArrowUpRight size={13}/></button>)}</div><div className="lab-body" key={mode}>
+    {mode==='Estimate'&&<><div className="lab-caption">01 / ESTIMATE TOOL</div><h3>Simulasi estimasi</h3><label className="range-label" htmlFor="demo-quantity">Jumlah item <strong>{quantity} unit</strong></label><input id="demo-quantity" type="range" min="1" max="20" value={quantity} onChange={e=>setQuantity(Number(e.target.value))}/><div className="lab-total"><span>TOTAL DEMO / Rp250.000 PER ITEM</span><strong aria-live="polite">Rp{new Intl.NumberFormat('id-ID').format(quantity*250000)}</strong></div></>}
+    {mode==='QC'&&<><div className="lab-caption">02 / INSPECTION CHECKLIST</div><h3>Pemeriksaan QC</h3>{['Spesifikasi sesuai','Dimensi diperiksa','Dokumen lengkap'].map((label,i)=><button className={`lab-check ${checks[i]?'checked':''}`} key={label} onClick={()=>setChecks(checks.map((v,j)=>i===j?!v:v))} aria-pressed={checks[i]}><span>{checks[i]&&<Check size={13}/>}</span>{label}<small>{checks[i]?'CHECKED':'PENDING'}</small></button>)}<div className="lab-progress"><span style={{width:`${checks.filter(Boolean).length/3*100}%`}}/></div><p className="lab-help" aria-live="polite">{checks.filter(Boolean).length} dari 3 pemeriksaan selesai</p></>}
+    {mode==='Tasks'&&<><div className="lab-caption">03 / DAILY MANAGEMENT</div><h3>Pekerjaan hari ini</h3>{tasks.map((task,i)=><button className={`lab-check ${task.done?'checked':''}`} key={task.name} onClick={()=>setTasks(tasks.map((t,j)=>i===j?{...t,done:!t.done}:t))} aria-pressed={task.done}><span>{task.done&&<Check size={13}/>}</span>{task.name}<small>{task.done?'DONE':'TO DO'}</small></button>)}<p className="lab-help" aria-live="polite">{tasks.filter(t=>t.done).length} / {tasks.length} tugas selesai · klik untuk mengubah status</p></>}
+    {mode==='Barcode'&&<><div className="lab-caption">04 / SAMPLE IDENTIFICATION</div><h3>Buat barcode sample</h3><label className="barcode-input-label" htmlFor="sample-code">Kode sample</label><input id="sample-code" className="sample-code-input" value={code} maxLength="24" onChange={e=>setCode(e.target.value)} aria-invalid={!valid}/>{valid?<div className="live-barcode"><svg ref={barcode} role="img" aria-label={`Barcode CODE128 ${code}`}/></div>:<p className="lab-help">Isi 1–24 karakter huruf Latin, angka, atau tanda baca.</p>}<button className="barcode-download" disabled={!valid} onClick={download}><Download size={14}/>Download SVG</button></>}
+    </div><div className="lab-panel-footer"><span>CLIENT-SIDE DEMO</span><span>LARAVEL LOGIC → REACT PREVIEW</span></div></div></section>;
+}
