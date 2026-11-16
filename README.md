@@ -2,9 +2,9 @@
 
 [Website](https://exynouz.github.io/portfolio/) · [GitHub](https://github.com/exynouz)
 
-Portfolio React untuk menampilkan pengembangan modul kalkulasi produk dan aplikasi bisnis: GPP, SWG, EJF, EJM, Sample Product, dan Master Data Audit.
+Portfolio React untuk menampilkan tools, modul, website, dan report yang dikembangkan untuk kebutuhan perusahaan: Product Development (estimate, extractor part number, formula), Product Inspection (QC), Daily Task Management, Sample Product Barcode, dan Reporting & Data Tools.
 
-Antarmuka dan ilustrasi produk dibuat ulang khusus untuk portfolio. Source code aplikasi internal, data pelanggan, dump database, dan harga perusahaan tidak disertakan.
+Antarmuka dan ilustrasi modul dibuat ulang khusus untuk portfolio. Source code aplikasi internal, data pelanggan, dump database, dan harga perusahaan tidak disertakan.
 
 ## Local development
 
