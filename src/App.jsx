@@ -1,119 +1,65 @@
 import {useEffect, useRef, useState} from 'react';
-import {ArrowUpRight, ArrowDown, ArrowRight, Check, Code2, Layers3, Menu, Moon, Sun, X, Mail, GitBranch, Database, SlidersHorizontal, CheckCheck, CircleDot} from 'lucide-react';
+import {ArrowUpRight, ArrowRight, ArrowDown, Check, X, Menu, GitBranch, Code2, Database, Layers, SlidersHorizontal, Box, FileText, Copy, ChevronRight} from 'lucide-react';
 import {profile, projects} from './data.js';
 
-const waLink = `https://wa.me/${profile.whatsapp}?text=${encodeURIComponent('Halo Valen, saya tertarik berdiskusi tentang sebuah project.')}`;
+const whatsapp = `https://wa.me/${profile.whatsapp}?text=${encodeURIComponent('Halo Valen, saya ingin berdiskusi tentang project.')}`;
 
-function Mark({className = ''}) {
-  return <svg className={className} width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true"><path d="M3 5h7l5 11L20 5h7L15 26 3 5Z" fill="currentColor"/></svg>;
+function Logo(){return <span className="logo-symbol" aria-hidden="true"><span>v</span><span>r</span></span>;}
+
+function ProductObject({type='gpp'}) {
+  if(type==='samples')return <div className="sample-object"><div className="sample-file"><FileText size={32}/><span>PRODUCT SAMPLE</span><b>SP—001</b><div/><div/><div/></div><div className="sample-file back"/></div>;
+  if(type==='audit')return <div className="data-object"><Database size={75} strokeWidth={.8}/><span className="data-connection"><i/><ArrowRight size={20}/><i/></span><Database size={75} strokeWidth={.8}/><span className="data-match"><Check size={12}/> MATCH BY BUSINESS KEY</span></div>;
+  if(type==='ejf')return <div className="frame-object"><div className="frame-back"/><div className="frame-folds">{Array.from({length:8},(_,i)=><i key={i}/>)}</div><div className="frame-front"><span/></div></div>;
+  if(type==='ejm')return <div className="bellows-object"><div className="bellows-neck"/>{Array.from({length:12},(_,i)=><i key={i}/>)}<div className="bellows-flange"/></div>;
+  return <div className={`ring-object ${type==='swg'?'gasket-object':''}`}><div className="ring-shadow"/><div className="ring-bottom"/><div className="ring-main"><div className="ring-texture"/><div className="ring-hole"/>{type==='swg'&&<div className="ring-inner"/>}<span className="ring-spec">{type==='swg'?'SPIRAL WOUND':'GLAND PACKING'}</span></div>{type==='swg'&&<div className="ring-floating"/>}</div>;
 }
 
-function ArrowButton({children, href, secondary = false, ...props}) {
-  return <a className={`button ${secondary ? 'button-secondary' : ''}`} href={href} {...props}>{children}<ArrowUpRight size={18}/></a>;
-}
-
-function CalculatorArt({large = false}) {
-  return <div className={`calculator-art ${large ? 'calculator-art-large' : ''}`} aria-label="Ilustrasi dashboard kalkulasi produk">
-    <div className="art-orbit orbit-one"/><div className="art-orbit orbit-two"/>
-    <div className="calc-window">
-      <div className="window-top"><span className="window-logo"><Mark/> precision<span className="app-dot">®</span></span><span className="window-dots">•••</span></div>
-      <div className="calc-window-body"><div className="calc-side"><span className="side-icon active"><Layers3 size={15}/></span><span className="side-icon"><SlidersHorizontal size={15}/></span><span className="side-icon"><Database size={15}/></span></div>
-        <div className="calc-content"><div className="calc-content-head"><div><span className="tiny-label">PRODUCT WORKSPACE</span><h4>Every detail counts.</h4></div><span className="small-pill"><i/> Synced</span></div>
-          <div className="calc-metrics"><div><span>Estimation overview</span><strong>Rp 1.250.000</strong><small>Ilustrasi tampilan</small></div><div className="mini-chart">{[32,53,41,66,54,84,71,96].map((n,i)=><i key={i} style={{height:`${n}%`}}/>)}</div></div>
-          <div className="calc-table"><div className="calc-table-heading"><span>COMPONENT</span><span>STATUS</span><span>DETAIL</span></div>{[['Material','Validated','01'],['Production','Calculated','02'],['Finishing','Reviewed','03']].map(([name,status,num])=><div className="calc-table-row" key={name}><span><i>{num}</i>{name}</span><span><Check size={10}/>{status}</span><span>↗</span></div>)}</div>
-          <div className="calc-bottom"><span><CircleDot size={12}/> Built around your workflow.</span><ArrowUpRight size={14}/></div>
-        </div>
-      </div>
-    </div>
-    {large && <><div className="floating-note note-code"><Code2 size={18}/><span>Complex logic.<br/><strong>Simple experience.</strong></span></div><div className="floating-note note-check"><span className="note-check-icon"><CheckCheck size={20}/></span><div><strong>Details, connected.</strong><small>From data to decision.</small></div></div></>}
+function Workspace({project, compact=false}) {
+  const [view,setView]=useState('Spesifikasi');
+  return <div className={`workspace ${compact?'compact':''}`}>
+    <div className="workspace-top"><span className="window-controls"><i/><i/><i/></span><span>PRODUCT WORKSPACE <span>/ {project.code}</span></span><span className="workspace-version">01.00</span></div>
+    <div className="workspace-body"><aside className="workspace-sidebar"><span className="workspace-app"><Box size={19}/></span>{[Layers,SlidersHorizontal,Database,FileText].map((Icon,i)=><span key={i} className={i===0?'selected':''}><Icon size={15}/></span>)}<span className="sidebar-bottom">VR</span></aside>
+    <div className="workspace-main"><div className="workspace-heading"><div><span className="workspace-breadcrumb">Calculation <ChevronRight size={9}/>{project.code}</span><h3>{project.name}</h3></div><span className="workspace-mode">SIMULATION</span></div>
+    <div className="workspace-tabs">{['Spesifikasi','Material','Summary'].map(t=><button key={t} className={view===t?'selected':''} onClick={()=>setView(t)}>{t}</button>)}</div>
+    <div className={`workspace-canvas object-${project.color}`}><div className="technical-grid"/><span className="canvas-label">{project.code} / PRODUCT VIEW</span><ProductObject type={project.id}/><span className="dimension dimension-x"><i/> PRODUCT CONFIGURATION <i/></span><span className="canvas-legend">VISUAL PREVIEW</span><span className="canvas-axis">Y<br/>└─ X</span></div>
+    <div className="workspace-fields">{(view==='Material'?[['MATERIAL','Master data'],['PROSES','Production'],['FINISHING','Configuration']]:view==='Summary'?[['MATERIAL COST','—'],['PROCESS COST','—'],['ESTIMATION','—']]:[['PRODUCT TYPE',project.code],['CONFIGURATION','Custom'],['UNIT','Metric']]).map(([label,value])=><div key={label}><span>{label}</span><strong>{value}<ChevronRight size={10}/></strong></div>)}</div>
+    <div className="workspace-footer"><span><i/> Portfolio interface preview</span><span>No internal data <Check size={10}/></span></div></div></div>
   </div>;
 }
 
-function SamplesArt() {
-  return <div className="samples-art" aria-label="Konsep antarmuka sample product"><div className="sample-header"><span><i/> WORKSPACE</span><span>⌘ K</span></div><div className="sample-title">Sample products <span>+ New sample</span></div><div className="sample-search"><span>Search a sample...</span><SlidersHorizontal size={12}/></div><div className="sample-columns"><span>PRODUCT</span><span>STATUS</span></div>{[['SP-001','Product specification','Ready'],['SP-002','Material review','In review'],['SP-003','Sample request','Draft']].map(([code,name,status],i)=><div className="sample-row" key={code}><span className={`sample-product-icon product-icon-${i}`}><Layers3 size={17}/></span><div><strong>{name}</strong><small>{code}</small></div><span className={`sample-status sample-status-${i}`}>{status}</span></div>)}<div className="art-caption">Konsep antarmuka · data ilustrasi</div></div>;
+function CaseDialog({project,onClose}){
+  const ref=useRef(null);
+  useEffect(()=>{const element=ref.current,previous=document.activeElement;const overflow=document.body.style.overflow;element.showModal();document.body.style.overflow='hidden';return ()=>{if(element.open)element.close();document.body.style.overflow=overflow;previous?.focus({preventScroll:true});};},[]);
+  return <dialog ref={ref} className="case-dialog" aria-labelledby="case-title" onCancel={onClose} onClick={e=>{if(e.target===e.currentTarget)onClose();}}><div className="case-content"><div className="case-top"><span className="section-label">PROJECT / {project.code}</span><button className="icon-button" onClick={onClose} aria-label="Tutup detail proyek"><X size={20}/></button></div><h2 id="case-title">{project.name}</h2><p className="case-intro">{project.description}</p><div className="tag-list">{project.tags.map(t=><span key={t}>{t}</span>)}</div><Workspace project={project}/><div className="case-details"><div><h3>Tentang modul</h3><p>{project.detail}</p></div><div><h3>Bagian yang ditampilkan</h3><ul>{project.features.map(f=><li key={f}><Check size={14}/>{f}</li>)}</ul></div></div><p className="privacy-note">Antarmuka dibuat ulang untuk portfolio. Data perusahaan, pelanggan, harga, dan source code internal tidak dipublikasikan.</p></div></dialog>;
 }
 
-function AuditArt() {
-  return <div className="audit-art" aria-label="Ilustrasi perbandingan master data"><div className="audit-head"><span><Database size={14}/> DATA COMPARE</span><span className="audit-live">●</span></div><div className="audit-flow"><div><span className="audit-node"><Database size={24}/></span><strong>Development</strong><small>Source data</small></div><span className="audit-connect"><i/><ArrowRight size={18}/><i/></span><div><span className="audit-node"><Database size={24}/></span><strong>Production</strong><small>Reference data</small></div></div><div className="audit-results"><div><span><Check size={13}/> Matched</span><strong>Business keys</strong></div><div><span><SlidersHorizontal size={13}/> Compared</span><strong>Field by field</strong></div><div><span><CheckCheck size={13}/> Traceable</span><strong>Clear differences</strong></div></div><div className="art-caption">Konsep visual · tanpa data internal</div></div>;
-}
-
-function ProjectVisual({kind, large = false}) {
-  if (kind === 'calculator') return <CalculatorArt large={large}/>;
-  if (kind === 'samples') return <SamplesArt/>;
-  return <AuditArt/>;
-}
-
-function InteractiveDemo() {
-  const [quantity, setQuantity] = useState(3);
-  const [finishing, setFinishing] = useState(false);
-  const base = 250000 * quantity;
-  const finish = finishing ? 45000 * quantity : 0;
-  const currency = n => new Intl.NumberFormat('id-ID', {style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n);
-  return <div className="demo"><div className="demo-heading"><span className="eyebrow">PLAYGROUND</span><h3>Ubah input.<br/>Lihat semuanya terhubung.</h3><p>Demo interaksi sederhana dengan angka ilustrasi. Bukan rumus atau harga produk perusahaan.</p></div><div className="demo-controls"><label htmlFor="quantity">Jumlah produk <strong>{quantity} unit</strong></label><input id="quantity" type="range" min="1" max="10" value={quantity} onChange={e=>setQuantity(Number(e.target.value))}/><button className={`demo-toggle ${finishing?'is-on':''}`} onClick={()=>setFinishing(!finishing)} aria-pressed={finishing}><span><Layers3 size={17}/>Tambahkan finishing</span><i><b/></i></button><div className="demo-breakdown"><div><span>Produk dasar</span><strong>{currency(base)}</strong></div><div><span>Finishing</span><strong>{currency(finish)}</strong></div></div><div className="demo-total" aria-live="polite"><span>Total ilustrasi</span><strong>{currency(base + finish)}</strong></div></div></div>;
-}
-
-function ProjectDialog({project, close}) {
-  const dialog = useRef(null);
-  const [tab, setTab] = useState('story');
-  useEffect(()=>{
-    const el = dialog.current;
-    const previouslyFocused = document.activeElement;
-    el.showModal();
-    const previous = document.body.style.overflow;
-    document.body.style.overflow='hidden';
-    return ()=>{
-      if (el.open) el.close();
-      document.body.style.overflow=previous;
-      previouslyFocused?.focus({preventScroll: true});
-    };
-  }, []);
-  return <dialog ref={dialog} className="project-dialog" onCancel={close} onClick={e=>{if(e.target===e.currentTarget)close();}} aria-labelledby="case-title"><div className="dialog-inner"><div className="dialog-top"><span className="eyebrow">PROJECT NOTES / {project.number}</span><button className="icon-button" onClick={close} aria-label="Tutup studi kasus"><X size={22}/></button></div><h2 id="case-title">{project.name}</h2><p className="dialog-intro">{project.description}</p><div className="tags">{project.tags.map(t=><span key={t}>{t}</span>)}</div>{project.id==='product-calculator' && <div className="dialog-tabs" role="tablist" aria-label="Detail proyek"><button role="tab" aria-selected={tab==='story'} onClick={()=>setTab('story')}>Studi kasus</button><button role="tab" aria-selected={tab==='demo'} onClick={()=>setTab('demo')}>Coba interaksi <ArrowUpRight size={14}/></button></div>}{tab==='demo'?<InteractiveDemo/>:<><div className={`dialog-visual visual-${project.visual}`}><ProjectVisual kind={project.visual}/></div><div className="case-grid"><span className="eyebrow">01 / TANTANGAN</span><p>{project.problem}</p><span className="eyebrow">02 / PENDEKATAN</span><ul>{project.approach.map(a=><li key={a}><Check size={15}/>{a}</li>)}</ul><span className="eyebrow">03 / FOKUS HASIL</span><p>{project.outcome}</p></div><p className="project-disclaimer">Visual dibuat ulang untuk portfolio. Data operasional dan source code internal tidak ditampilkan.</p></>}</div></dialog>;
-}
-
-function App() {
-  const [filter,setFilter] = useState('All work');
-  const [selected,setSelected] = useState(null);
-  const [menu,setMenu] = useState(false);
-  const [dark,setDark] = useState(()=>{try{return localStorage.getItem('valen-theme')==='dark';}catch{return false;}});
-  const [copied,setCopied] = useState(false);
-  const [active,setActive] = useState('work');
-  const copyTimer=useRef(null);
-
-  useEffect(()=>{
-    document.documentElement.dataset.theme=dark?'dark':'light';
-    try{localStorage.setItem('valen-theme',dark?'dark':'light');}catch{}
-  },[dark]);
-  useEffect(()=>{
-    const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting)setActive(entry.target.id);});},{rootMargin:'-15% 0px -60% 0px'});
-    document.querySelectorAll('section[id]').forEach(el=>observer.observe(el));
-    return ()=>{observer.disconnect();clearTimeout(copyTimer.current);};
-  },[]);
-  async function copyEmail(){
-    try{await navigator.clipboard.writeText(profile.email);setCopied(true);clearTimeout(copyTimer.current);copyTimer.current=setTimeout(()=>setCopied(false),2500);}
-    catch{window.location.href=`mailto:${profile.email}`;}
-  }
-  const visible = projects.filter(p=>filter==='All work'||p.category===filter);
-  const closeMenu=()=>setMenu(false);
-
+function App(){
+  const [featured,setFeatured]=useState('gpp');
+  const [filter,setFilter]=useState('Semua');
+  const [selected,setSelected]=useState(null);
+  const [menu,setMenu]=useState(false);
+  const [copied,setCopied]=useState(false);
+  const timer=useRef(null);
+  useEffect(()=>()=>clearTimeout(timer.current),[]);
+  const current=projects.find(p=>p.id===featured);
+  const filtered=projects.filter(p=>filter==='Semua'||p.category===filter);
+  async function copy(){try{await navigator.clipboard.writeText(profile.email);setCopied(true);clearTimeout(timer.current);timer.current=setTimeout(()=>setCopied(false),2500);}catch{location.href=`mailto:${profile.email}`;}}
   return <>
     <a className="skip-link" href="#main">Langsung ke konten</a>
-    <header className="site-header"><div className="nav-wrap"><a className="brand" href="#" aria-label="Valen Ramadhan, kembali ke atas"><Mark/><span>valen<span className="brand-period">.</span></span></a><nav id="mobile-nav" className={menu?'nav-links nav-open':'nav-links'} aria-label="Navigasi utama">{[['work','Karya'],['about','Tentang'],['process','Cara kerja']].map(([id,label])=><a key={id} href={`#${id}`} className={active===id?'active':''} onClick={closeMenu}>{label}</a>)}<a className="nav-contact" href="#contact" onClick={closeMenu}>Mari ngobrol <ArrowUpRight size={16}/></a></nav><div className="nav-actions"><button className="theme-toggle" onClick={()=>setDark(!dark)} aria-label={dark?'Gunakan tema terang':'Gunakan tema gelap'}>{dark?<Sun size={17}/>:<Moon size={17}/>}</button><button className="menu-toggle" aria-expanded={menu} aria-controls="mobile-nav" aria-label={menu?'Tutup navigasi':'Buka navigasi'} onClick={()=>setMenu(!menu)}>{menu?<X size={23}/>:<Menu size={23}/>}</button></div></div></header>
+    <header className="site-header"><div className="container nav"><a href="#" className="brand" aria-label="Valen Ramadhan, ke atas"><Logo/><span>valen<span className="accent">.</span></span></a><nav id="main-navigation" className={menu?'navigation open':'navigation'} aria-label="Navigasi utama">{[['projects','Projects'],['about','Tentang'],['contact','Kontak']].map(([id,label])=><a key={id} href={`#${id}`} onClick={()=>setMenu(false)}>{label}</a>)}<a href={profile.github} target="_blank" rel="noopener noreferrer">GitHub <ArrowUpRight size={13}/></a></nav><a className="header-contact" href={whatsapp} target="_blank" rel="noopener noreferrer">Hubungi saya <ArrowUpRight size={14}/></a><button className="menu-toggle" onClick={()=>setMenu(!menu)} aria-expanded={menu} aria-controls="main-navigation" aria-label={menu?'Tutup navigasi':'Buka navigasi'}>{menu?<X size={22}/>:<Menu size={22}/>}</button></div></header>
     <main id="main">
-      <section className="hero container"><div className="hero-copy"><div className="hero-intro"><span className="status-dot"/><span>VALEN RAMADHAN</span><span className="intro-line"/><span>WEB DEVELOPER</span></div><h1>Ide yang rumit.<br/>Pengalaman yang<br/><em>terasa mudah.</em></h1><p>Saya membangun aplikasi web yang membantu pekerjaan nyata—menghubungkan logika bisnis, data, dan antarmuka yang intuitif.</p><div className="hero-actions"><ArrowButton href="#work">Jelajahi karya saya</ArrowButton><a className="text-link" href="#about">Kenalan dulu <ArrowRight size={16}/></a></div><div className="hero-bottom"><span className="tiny-label">BUILT WITH INTENTION.</span><span className="hero-scroll">SCROLL TO EXPLORE <ArrowDown size={12}/></span></div></div><div className="hero-visual"><div className="hero-visual-grid"/><div className="visual-corner corner-tl">+</div><div className="visual-corner corner-br">+</div><span className="visual-index">FIG. 01 — FROM COMPLEXITY TO CLARITY</span><CalculatorArt large/><div className="hero-visual-footer"><span><i/> SYSTEMS THAT MAKE SENSE</span><span>VR / 001</span></div></div></section>
+      <section className="hero container"><div className="hero-copy"><div className="hero-label"><span/> WEB DEVELOPER <i/> INDONESIA</div><h1>Valen<br/>Ramadhan<span>.</span></h1><div className="hero-bio"><span className="bio-rule"/><p>Saya mengembangkan aplikasi kalkulasi produk, quotation, dan operasional. Dari logika perhitungan di backend sampai tampilan yang dipakai sehari-hari.</p></div><div className="hero-actions"><a className="button primary" href="#projects">Lihat project <ArrowDown size={15}/></a><a className="button text" href={profile.github} target="_blank" rel="noopener noreferrer">GitHub <ArrowUpRight size={15}/></a></div><div className="hero-stack"><span>LARAVEL</span><i/><span>JAVASCRIPT</span><i/><span>REACT</span><i/><span>MYSQL</span></div></div>
+      <div className="hero-studio"><div className="studio-top"><span>PRODUCT ENGINEERING</span><span>001—004</span></div><div className="studio-object object-blue"><div className="technical-grid"/><ProductObject type="swg"/><span className="studio-measure measure-top">Ø / CONFIGURABLE</span><span className="studio-measure measure-bottom">SWG — SPIRAL WOUND GASKET</span><span className="studio-axis">Z<br/>│<br/>└── X</span></div><div className="studio-bottom"><span><i/> INTERFACE & BUSINESS LOGIC</span><ArrowUpRight size={18}/></div></div></section>
 
-      <div className="stack-strip"><div className="container stack-inner"><span className="stack-label">MY EVERYDAY TOOLKIT</span><div className="stack-items"><span><Code2 size={17}/> Laravel</span><span><span className="react-mark">⚛</span> React</span><span><span className="js-mark">JS</span> JavaScript</span><span><Database size={16}/> MySQL</span><span><GitBranch size={17}/> Git</span><span><span className="css-mark">#</span> CSS</span></div></div></div>
+      <section className="featured-section container" aria-labelledby="featured-title"><div className="section-top"><div><span className="section-label">PRODUCT APPLICATIONS</span><h2 id="featured-title">Modul yang saya kerjakan<span>.</span></h2></div><p>Spesifikasi, material, perhitungan,<br/>dan estimasi dalam satu workspace.</p></div><div className="module-tabs" aria-label="Pilih preview modul">{projects.slice(0,4).map(p=><button className={featured===p.id?'active':''} aria-pressed={featured===p.id} onClick={()=>setFeatured(p.id)} key={p.id}><span>{p.code}</span><small>{p.name}</small><ArrowUpRight size={15}/></button>)}</div><div className="featured-workspace"><Workspace key={featured} project={current}/><div className="featured-info"><div><span className="section-label">{current.code} / CALCULATION MODULE</span><h3>{current.name}</h3><p>{current.description}</p></div><button className="button outline" onClick={()=>setSelected(current)}>Detail project <ArrowUpRight size={15}/></button></div></div></section>
 
-      <section id="work" className="work-section container section-space"><div className="section-top"><span className="eyebrow"><i/> 01 / SELECTED WORK</span><span className="section-aside">Dibangun dari kebutuhan nyata.</span></div><div className="section-heading"><h2>Logika yang kuat.<br/><em>Hasil yang terasa.</em></h2><p>Beberapa bagian dari perjalanan saya<br className="desktop-break"/> membangun aplikasi dan menyelesaikan masalah.</p></div><div className="work-filters" aria-label="Filter proyek">{['All work','Business systems','Interfaces'].map(f=><button key={f} className={f===filter?'selected':''} onClick={()=>setFilter(f)} aria-pressed={f===filter}>{f}{f===filter&&<span>{visible.length.toString().padStart(2,'0')}</span>}</button>)}</div><div className="project-grid">{visible.map(project=><article className={`project-card project-${project.visual}`} key={project.id}><button className={`project-art-button visual-${project.visual}`} onClick={()=>setSelected(project)} aria-label={`Buka studi kasus ${project.name}`}><div className="project-art-top"><span>{project.category}</span><span>0{projects.indexOf(project)+1} / CASE STUDY</span></div><ProjectVisual kind={project.visual}/><span className="project-open"><ArrowUpRight size={20}/></span></button><div className="project-description"><div className="project-title-row"><span className="project-number">/{project.number}</span><button onClick={()=>setSelected(project)}><h3>{project.title}</h3><ArrowUpRight size={20}/></button></div><p>{project.description}</p><div className="tags">{project.tags.map(t=><span key={t}>{t}</span>)}</div></div></article>)}</div><div className="work-note"><span><CircleDot size={14}/> Konteks nyata. Visual dan data demo dibuat khusus untuk portfolio.</span><a href="#contact">Punya tantangan serupa? <ArrowUpRight size={15}/></a></div></section>
+      <section id="projects" className="projects-section container"><div className="section-top"><div><span className="section-label">SELECTED PROJECTS</span><h2>Portfolio<span>.</span></h2></div><span className="section-count">{projects.length.toString().padStart(2,'0')} PROJECTS</span></div><div className="project-filters" aria-label="Filter proyek">{['Semua','Kalkulasi produk','Operasional','Data & tools'].map(f=><button key={f} className={filter===f?'active':''} aria-pressed={filter===f} onClick={()=>setFilter(f)}>{f}</button>)}</div><div className="project-grid">{filtered.map((p,i)=><article className="project-card" key={p.id}><button className={`project-visual object-${p.color}`} onClick={()=>setSelected(p)} aria-label={`Buka detail ${p.name}`}><div className="technical-grid"/><span className="project-visual-label">{p.code}<small>{p.category}</small></span><ProductObject type={p.id}/><span className="project-visual-index">{p.tags[0]} / WEB APPLICATION</span><span className="project-open"><ArrowUpRight size={19}/></span></button><div className="project-card-info"><div className="project-card-heading"><h3><button onClick={()=>setSelected(p)}>{p.name}</button></h3><span>{String(projects.indexOf(p)+1).padStart(2,'0')}</span></div><p>{p.description}</p><div className="tag-list">{p.tags.map(t=><span key={t}>{t}</span>)}</div></div></article>)}</div></section>
 
-      <section id="about" className="about-section"><div className="container about-grid"><div className="about-art"><div className="about-art-label"><span className="eyebrow">A LITTLE ABOUT ME</span><ArrowUpRight size={20}/></div><div className="monogram">v<span>r</span><i>.</i></div><div className="about-art-bottom"><span>CURIOUS MIND.<br/>PRACTICAL BUILDER.</span><svg width="82" height="36" viewBox="0 0 82 36" fill="none" aria-hidden="true"><path d="M1 29 14 8l9 18L42 2l-6 30L59 9l-2 19L81 8" stroke="currentColor" strokeWidth="2"/></svg></div></div><div className="about-copy"><span className="eyebrow"><i/> 02 / BEHIND THE WORK</span><h2>Halo, saya Valen.<br/>Saya suka membuat<br/><em>hal jadi masuk akal.</em></h2><p>Saya senang berada di pertemuan antara logika dan tampilan. Memahami proses yang panjang, mencari bagian yang bisa disederhanakan, lalu mengubahnya menjadi aplikasi yang nyaman digunakan.</p><p>Belakangan, saya banyak mengerjakan aplikasi bisnis berbasis Laravel: dari kalkulasi produk dan estimasi, sampai pengelolaan sample serta penelusuran master data. Portfolio ini saya bangun dengan React sebagai ruang untuk merangkai cerita di balik pekerjaan tersebut.</p><div className="about-values"><span><Check size={15}/> Detail matters</span><span><Check size={15}/> Always learning</span><span><Check size={15}/> Build with purpose</span></div><a className="text-link" href={`mailto:${profile.email}`}>Mulai percakapan <ArrowUpRight size={16}/></a></div></div></section>
+      <section id="about" className="about-section"><div className="container about-grid"><div><span className="section-label">TENTANG SAYA</span><h2>Backend, frontend,<br/>dan detail di antaranya<span>.</span></h2><p>Saya Valen Ramadhan. Saya mengerjakan aplikasi web berbasis Laravel dan JavaScript, terutama untuk kebutuhan kalkulasi produk dan operasional industri.</p><p>Pekerjaan saya mencakup input spesifikasi, rumus perhitungan, pengelolaan master data, sampai summary dan quotation. Saat ada hasil yang berbeda, saya menelusuri alur kode dan datanya, bukan hanya tampilan akhirnya.</p><a className="inline-link" href={`mailto:${profile.email}`}>Kirim email <ArrowUpRight size={15}/></a></div><div className="skill-list">{[[Code2,'Backend development','Laravel, PHP, business logic, validation'],[Layers,'Frontend development','JavaScript, React, Blade, CSS'],[Database,'Database & master data','MySQL, SQL, audit dan perbandingan data'],[GitBranch,'Development workflow','Git, debugging, pengujian regresi']].map(([Icon,title,desc])=><div className="skill-row" key={title}><span className="skill-icon"><Icon size={21}/></span><div><h3>{title}</h3><p>{desc}</p></div><ArrowUpRight size={16}/></div>)}</div></div></section>
 
-      <section id="process" className="container process-section section-space"><div className="section-top"><span className="eyebrow"><i/> 03 / HOW I WORK</span><span className="section-aside">Dari pertanyaan yang tepat, ke solusi yang berguna.</span></div><div className="section-heading"><h2>Bukan sekadar selesai.<br/><em>Tapi bisa diandalkan.</em></h2></div><div className="process-grid">{[{n:'01',title:'Pahami dulu.',desc:'Mulai dari kebutuhan pengguna, alur kerja, dan aturan bisnis. Memastikan masalahnya jelas sebelum memilih solusi.',icon:<CircleDot/>},{n:'02',title:'Susun dengan jelas.',desc:'Merancang struktur data, alur interaksi, dan batas antarfitur agar pengembangannya tetap terarah.',icon:<Layers3/>},{n:'03',title:'Bangun & periksa.',desc:'Mengembangkan aplikasi secara bertahap, mengecek hasil, dan menelusuri detail sampai perilakunya sesuai.',icon:<Code2/>}].map(p=><article className="process-card" key={p.n}><div className="process-card-top"><span>{p.n}</span>{p.icon}</div><h3>{p.title}</h3><p>{p.desc}</p><div className="process-line"><i/></div></article>)}</div><div className="closing-note"><span>GOOD CODE IS GOOD COMMUNICATION.</span><span>Dan aplikasi yang baik dimulai dari memahami manusia yang memakainya.</span></div></section>
-
-      <section id="contact" className="contact-section"><div className="container contact-inner"><div className="contact-top"><span className="eyebrow"><i/> 04 / LET’S MAKE IT HAPPEN</span><span>HAVE AN IDEA IN MIND?</span></div><div className="contact-heading"><h2>Proyek berikutnya,<br/><em>kita bangun bersama.</em></h2><a href={waLink} className="contact-orb" aria-label="Diskusi proyek melalui WhatsApp" target="_blank" rel="noopener noreferrer"><ArrowUpRight strokeWidth={1.2}/></a></div><div className="contact-bottom"><div><p>Punya ide, tantangan, atau sekadar ingin kenalan?</p><a className="contact-email" href={`mailto:${profile.email}`}>{profile.email}<ArrowUpRight size={20}/></a></div><div className="contact-actions"><button onClick={copyEmail} className="copy-button" aria-live="polite">{copied?<><Check size={15}/>Email tersalin</>:<><Mail size={15}/>Salin email</>}</button><a href={waLink} target="_blank" rel="noopener noreferrer">WhatsApp <ArrowUpRight size={15}/></a></div></div></div></section>
-    </main>
-    <footer className="container footer"><a className="brand footer-brand" href="#"><Mark/><span>valen.</span></a><span>© {new Date().getFullYear()} Valen Ramadhan</span><a href="#">Back to top <ArrowUpRight size={14}/></a></footer>
-    {selected&&<ProjectDialog key={selected.id} project={selected} close={()=>setSelected(null)}/>}
+      <section id="contact" className="contact-section container"><div className="contact-eyebrow"><span className="section-label">CONTACT</span><span className="contact-line"/></div><div className="contact-heading"><h2>Ada project<br/>yang ingin dibahas<span>?</span></h2><a className="contact-arrow" href={whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Hubungi Valen lewat WhatsApp"><ArrowUpRight size={46} strokeWidth={1.5}/></a></div><div className="contact-bottom"><a className="contact-email" href={`mailto:${profile.email}`}>{profile.email}<ArrowUpRight size={18}/></a><div className="contact-links"><button onClick={copy} aria-live="polite">{copied?<Check size={14}/>:<Copy size={14}/>} {copied?'Email tersalin':'Salin email'}</button><a href={whatsapp} target="_blank" rel="noopener noreferrer">WhatsApp <ArrowUpRight size={14}/></a><a href={profile.github} target="_blank" rel="noopener noreferrer">GitHub <ArrowUpRight size={14}/></a></div></div></section>
+    </main><footer className="container footer"><a href="#" className="brand"><Logo/><span>valen.</span></a><span>© {new Date().getFullYear()} Valen Ramadhan</span><a href="#">Kembali ke atas <ArrowUpRight size={13}/></a></footer>
+    {selected&&<CaseDialog key={selected.id} project={selected} onClose={()=>setSelected(null)}/>}
   </>;
 }
-
 export default App;
